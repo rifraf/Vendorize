@@ -1,0 +1,14 @@
+h1. Vendorize
+
+--- placeholder ---
+
+Quick overview: caches all required/loaded files in _vendor_ subfolder.
+Used by IRPackager
+
+....... detail to follow ......
+
+h2. License
+
+Copyright (c) 2010 David Lake (rifraf -> rifraf.net)
+
+Released under the MIT license. See LICENSE file for details.
