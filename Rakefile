@@ -12,7 +12,7 @@ require 'rake/testtask'
 require 'spec/rake/spectask'
 
 spec = Gem::Specification.new do |s|
-  s.name = 'IRPackager'
+  s.name = 'Vendorize'
   s.version = '0.0.1'
   s.has_rdoc = true
   s.extra_rdoc_files = ['README', 'LICENSE']
@@ -36,7 +36,7 @@ Rake::RDocTask.new do |rdoc|
   files =['README', 'LICENSE', 'lib/**/*.rb']
   rdoc.rdoc_files.add(files)
   rdoc.main = "README" # page to start on
-  rdoc.title = "IRPackager Docs"
+  rdoc.title = "Vendorize Docs"
   rdoc.rdoc_dir = 'doc/rdoc' # rdoc output folder
   rdoc.options << '--line-numbers'
 end
@@ -45,7 +45,7 @@ Rake::TestTask.new do |t|
   t.test_files = FileList['test/**/*.rb']
 end
 
-Spec::Rake::SpecTask.new do |t|
-  t.spec_files = FileList['spec/**/*.rb']
-  t.libs << Dir["lib"]
-end
+#Spec::Rake::SpecTask.new do |t|
+#  t.spec_files = FileList['spec/**/*.rb']
+#  t.libs << Dir["lib"]
+#end
