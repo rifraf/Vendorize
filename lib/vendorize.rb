@@ -1,31 +1,45 @@
 #
 # Copies all required files that can be found to ENV['_Vendor_'] || './_vendor_'
 # TODO: absolute or relative paths
-# TODO: tests
 # TODO: copy folders? Optionally?
 # TODO: skip options
 #
-module Vendorize
+class Vendorize < File
   DEFAULT_FOLDER = './_vendor_'
 
   def self.root_folder
     ENV['_Vendor_'] || DEFAULT_FOLDER
   end
 
+  # Stolen/adapted from ftools.rb
+  def self.catname(from, to)
+    if directory? to
+      join to.sub(%r([/\\]$), ''), basename(from)
+    else
+      to
+    end
+  end
+
+  def self.copyfile(from, to)
+    to = catname(from, to)
+    open(to, "wb") {|f| f.write IO.read(from)}
+  end
+
   def self.vendorize(wanted_file)
     vendorize('ubygems') if wanted_file =~ /^rubygems$/i
     $LOAD_PATH.each {|location|
-      f = File.join(location, wanted_file)
+      f = join(location, wanted_file)
       ['', '.rb', '.so', '.o', '.dll'].each {|ext|
         file = f + ext
-        if File.exist?(file) && !File.directory?(file)
-          return "Cached" if location =~ /^#{root_folder}/
-          #dest = "#{root_folder}/#{wanted_file}#{ext}".gsub(/\//,'\\')
-          #Dir.mkdir File.dirname(dest) unless File.exists? File.dirname(dest)
-          dest = ensure_can_create_file("#{root_folder}/#{wanted_file}#{ext}")
-          cmd = "copy /y " + "\"#{file}\" \"#{dest}\"".gsub(/\//,'\\')
-          system cmd
-          return file
+        if exist?(file) && !directory?(file)
+          if location =~ /^#{root_folder}/
+            puts "'#{wanted_file}' loaded from cache at #{file}"
+          else
+            dest = ensure_can_create_file("#{root_folder}/#{wanted_file}#{ext}")
+            copyfile(file, dest)
+            puts "'#{wanted_file}' cached to #{dest} (from '#{file})"
+          end
+          return
         end
       }
     }
@@ -34,26 +48,23 @@ module Vendorize
 
   # Can't require any files => can't use FileUtils.mkdir_p
   def self.ensure_can_create_file(dest)
-    ensure_dir_exists File.dirname(dest)
+    ensure_dir_exists dirname(dest)
     return dest
   end
 
   def self.ensure_dir_exists(dir)
-    unless File.exists?(dir)
-      ensure_dir_exists(File.dirname(dir))
+    unless exists?(dir)
+      ensure_dir_exists(dirname(dir))
       Dir.mkdir dir
     end
   end
 end
 
-unless ENV['NO_VENDORIZE']  # Testing
+unless ENV['NO_VENDORIZE']  # Cannot do overrides within the tests...
 
   alias old_require require
   def require(path)
-    puts("======================= require > #{path}")
-    loc = Vendorize.vendorize(path)
-    loc ? puts("======================= found   > #{loc}")  : puts("no")
-
+    Vendorize.vendorize(path)
     old_require(path)
     rescue LoadError => load_error
       puts "failed"
