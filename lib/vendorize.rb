@@ -22,7 +22,11 @@ class Vendorize < File
 
   def self.copyfile(from, to)
     to = catname(from, to)
-    open(to, "wb") {|f| f.write IO.read(from)}
+    open(to, "wb") {|w|
+      content = nil
+      open(from, 'rb') {|r| content = r.read}
+      w.write content
+    }
   end
 
   def self.vendorize(wanted_file)
@@ -36,6 +40,8 @@ class Vendorize < File
             puts "'#{wanted_file}' loaded from cache at #{file}"
           else
             dest = ensure_can_create_file("#{root_folder}/#{wanted_file}#{ext}")
+cmd = "copy /y " + "\"#{file}\" \"#{dest}\" 2>&1".gsub(/\//,'\\')
+#`#{cmd}`
             copyfile(file, dest)
             puts "'#{wanted_file}' cached to #{dest} (from '#{file})"
           end
