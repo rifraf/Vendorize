@@ -11,22 +11,15 @@ class Vendorize < File
     ENV['_Vendor_'] || DEFAULT_FOLDER
   end
 
-  # Stolen/adapted from ftools.rb
   def self.catname(from, to)
-    if directory? to
-      join to.sub(%r([/\\]$), ''), basename(from)
-    else
-      to
-    end
+    directory?(to) ? join(to.sub(%r([/\\]$), ''), basename(from)) : to
   end
 
   def self.copyfile(from, to)
-    to = catname(from, to)
-    open(to, "wb") {|w|
-      content = nil
-      open(from, 'rb') {|r| content = r.read}
-      w.write content
-    }
+    open(from, 'rb') do |r|
+      content = r.read
+      open(catname(from, to), "wb") {|w| w.write content }
+    end
   end
 
   def self.vendorize(wanted_file)
@@ -40,7 +33,7 @@ class Vendorize < File
             puts "'#{wanted_file}' loaded from cache at #{file}"
           else
             dest = ensure_can_create_file("#{root_folder}/#{wanted_file}#{ext}")
-cmd = "copy /y " + "\"#{file}\" \"#{dest}\" 2>&1".gsub(/\//,'\\')
+#cmd = "copy /y " + "\"#{file}\" \"#{dest}\" 2>&1".gsub(/\//,'\\')
 #`#{cmd}`
             copyfile(file, dest)
             puts "'#{wanted_file}' cached to #{dest} (from '#{file})"
