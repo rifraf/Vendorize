@@ -1,4 +1,5 @@
 require 'test/unit'
+require 'fileutils'
 
 # Pull in vendorize so we can get constants, but without
 # doing the overrides. Otherwise we disrupt the test code...
@@ -56,7 +57,7 @@ class TestRequires < Test::Unit::TestCase
 
   def test_that_a_file_with_no_requires_creates_no_folder
     vendorize_testfile('no_loads.rb') {
-      assert_false File.exists?(Vendorize.root_folder)
+      assert !File.exists?(Vendorize.root_folder)
     }
   end
 
