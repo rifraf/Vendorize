@@ -1,0 +1,17 @@
+=begin
+No env, puts files in ./_vendor_
+Env, puts files there
+drb test
+gem loading
+ - test that first time builds cache, second time uses it
+Skipped files?
+relative files? ../lib/file (-> __/lib/file?)
+absolute files? c:\x\y\z (-> c_/x/y/z)
+Mixed \ and / separators
+=end
+
+  #$LOAD_PATH.unshift Vendorize.root_folder
+
+# TODO: absolute or relative paths
+# TODO: copy folders? Optionally?
+# TODO: skip options
