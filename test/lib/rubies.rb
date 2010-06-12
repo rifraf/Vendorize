@@ -1,6 +1,7 @@
 # My test PC doesn't always have ruby on the path...
 unless ENV['path'] =~ /ruby/i
   if ENV['COMPUTERNAME'] == 'DELL-QUAD'
+    puts "** Forcing Ruby version **"
     ENV['path'] = 'v:\\Play\\ruby187_mingw\\bin;' + ENV['path']
   end
 end
@@ -19,7 +20,12 @@ class RubyVersion
       when /1\.8\.5.*mswin32/ then @version = :mri185
       when /1\.8\.6.*mingw32/ then @version = :mingw186
       when /1\.8\.7.*mingw32/ then @version = :mingw187
-      when /1\.9\.1.*mingw32/ then @version = :mingw191
+      when /1\.9\.1.*mingw32/ 
+        @version = :mingw191
+        @exe << ' --disable-gems'
+      when /jruby/
+        @version = :jruby
+        @exe = 'jruby.exe'
       end
     rescue
       puts "not #{@exe}"
@@ -35,7 +41,7 @@ class RubyVersion
         begin
         ver = `#{@exe} -v`
         puts ver
-        rescue => e
+        rescue
           puts "** Unknown Ruby version **"
           exit(1)
         end
@@ -46,3 +52,4 @@ class RubyVersion
 end
 
 Ruby = RubyVersion.new
+puts "Running Ruby #{Ruby.version}"

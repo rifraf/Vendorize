@@ -117,11 +117,11 @@ class TestRequires < Test::Unit::TestCase
 
   def test_gem_requires
     rubygems_expected, plus_testunit, plusrake = case Ruby.version
-    when :mri185   then [34, 52, 59]
+    when :mri185   then [36, 54, 59]
     when :mingw186 then [35, 53, 59]
     when :mingw187 then [36, 54, 59]
-    when :mingw191 then [36, 54, 59]
-    when :jruby then    [36, 54, 59]
+    when :mingw191 then [34, 40, 47]
+    when :jruby then    [21, 39, 45]
     when :ironruby then [26, 44, 49]
     else flunk("What version?")
     end

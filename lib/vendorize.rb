@@ -1,9 +1,14 @@
 #
 # Copies all required/loaded files that are needed to ENV['_Vendor_'] || './_vendor_'
 #
+def dputs(*args)
+  #puts ["??? "] + args
+end
+
 class Vendorize < File
   DEFAULT_FOLDER = './_vendor_'
 
+  
   def self.root_folder
     ENV['_Vendor_'] || DEFAULT_FOLDER
   end
@@ -20,7 +25,7 @@ class Vendorize < File
   end
 
   def self.vendorize(wanted_file)
-    #puts "??? #{wanted_file}"
+    dputs "vendorize #{wanted_file}"
     vendorize('ubygems') if wanted_file =~ /^rubygems$/i
     $LOAD_PATH.each {|location|
       f = join(location, wanted_file)
@@ -34,15 +39,15 @@ class Vendorize < File
             unless exist?(dest)
               copyfile(file, dest)
               puts "'#{wanted_file}' cached to #{dest} (from '#{file})"
-            #else
-            #  puts "'#{wanted_file}' cached already to #{dest} (from '#{file})"
+            else
+              dputs "'#{wanted_file}' cached already to #{dest} (from '#{file})"
             end
           end
           return
         end
       }
     }
-    #puts "no #{wanted_file}"
+    dputs "no #{wanted_file}"
     nil
   end
 
@@ -65,13 +70,16 @@ unless ENV['NO_VENDORIZE']  # Cannot do overrides within the tests...
   module Kernel
     alias old_require require
     def require(path)
-#puts "?? #{path}"
-      ret = old_require(path)
-      Vendorize.vendorize(path)
-      return ret
+      dputs "req #{path}"
+      if old_require(path)
+        Vendorize.vendorize(path)
+        true
+      else
+        false
+      end
       rescue LoadError => load_error
         puts "require of #{path} failed (not necessarily a problem...)"
-#puts $LOAD_PATH
+        dputs $LOAD_PATH
         raise load_error
     end
     private :old_require
