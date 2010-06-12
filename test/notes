@@ -1,3 +1,12 @@
+Test prerequisites
+------------------
+GEMS:
+  rake
+  rspec
+  test-unit
+
+TODO
+----
 Test putting files somewhere else
 Test loads
 Put in the drb example app
@@ -12,3 +21,12 @@ Mixed \ and / separators
 
 # TODO: copy folders? Optionally?
 # TODO: skip certain files?
+Test on Ubuntu
+- 1.85 Y
+- 1.86 Y
+- 1.87 Y
+- 1.91 N require rubygems should give 36 files (on my machine...).
+  <36> expected but was
+  <2>.
+- JRuby N (partial gems)
+- IronRuby Y

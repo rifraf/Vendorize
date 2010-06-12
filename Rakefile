@@ -49,3 +49,5 @@ end
 #  t.spec_files = FileList['spec/**/*.rb']
 #  t.libs << Dir["lib"]
 #end
+
+CLEAN.include('_vendor_', './**/_*/')

@@ -7,12 +7,8 @@ ENV['NO_VENDORIZE'] = 'Testing'
 require 'vendorize'
 ENV['NO_VENDORIZE'] = nil
 
-# My test PC doesn't always have ruby on the path...
-unless ENV['path'].include?("\\ruby")
-  if ENV['COMPUTERNAME'] == 'DELL-QUAD'
-    ENV['path'] = 'v:\\Play\\ruby187_mingw\\bin;' + ENV['path']
-  end
-end
+$LOAD_PATH.unshift File.dirname(__FILE__)
+require 'lib/rubies'
 
 # Test helpers
 module VendorizeTestSupport
@@ -20,7 +16,7 @@ module VendorizeTestSupport
   Vendorize_location = File.expand_path("./lib/vendorize.rb")
 
   def vendorize_file(name, &blk)
-      output = `ruby -w -r#{Vendorize_location} #{name}`
+      output = `#{Ruby.exe} -w -r#{Vendorize_location} #{name}`
       begin
         blk.call(output) if block_given?
       ensure
@@ -77,21 +73,35 @@ class TestRequires < Test::Unit::TestCase
   end
 
   def test_a_file_requiring_a_library
+    rexml_expected = case Ruby.version
+    when :mri185 then 31
+    when :mingw186 then 35
+    when :mingw187 then 35
+    when :mingw191 then 35
+    when :jruby then 35
+    when :ironruby then 35
+    else flunk("What version?")
+    end
     vendorize_testfile('library_user.rb') { |output|
       assert File.exists?(Vendorize.root_folder)
       vendored_files = Dir["#{Vendorize.root_folder}/**/*"].select {|f| File.file?(f)}
-      assert_equal(35, vendored_files.length, "Rexml should load 35 files (on my machine...)")
+      assert_equal(rexml_expected, vendored_files.length, "Rexml should load #{rexml_expected} files (on my machine...)")
     }
   end
   
   def test_second_pass_uses_cached_files
+    rexml_expected = case Ruby.version
+    when :mri185 then 31
+    else 35
+    end
+
     vendorize_testfile('library_user.rb') { |first_output|
       first_reported_cached = first_output.scan(/'.*?' cached to /)
       assert File.exists?(Vendorize.root_folder)
       first_file_set = Dir["#{Vendorize.root_folder}/**/*"].select {|f| File.file?(f)}
 
       assert_equal(first_reported_cached.length, first_file_set.length, "The number of reported cached files should be the same as the number found")
-      assert_equal(35, first_file_set.length, "Rexml should load 35 files (on my machine...)")
+      assert_equal(rexml_expected, first_file_set.length, "Rexml should load #{rexml_expected} files (on my machine...)")
 
       vendorize_file('./library_user.rb') { |second_output|
         second_reported_cached = second_output.scan(/'.*?' cached to /)
@@ -106,29 +116,32 @@ class TestRequires < Test::Unit::TestCase
   end
 
   def test_gem_requires
+    rubygems_expected, plus_testunit, plusrake = case Ruby.version
+    when :mri185   then [34, 52, 59]
+    when :mingw186 then [35, 53, 59]
+    when :mingw187 then [36, 54, 59]
+    when :mingw191 then [36, 54, 59]
+    when :jruby then    [36, 54, 59]
+    when :ironruby then [26, 44, 49]
+    else flunk("What version?")
+    end
+
     ENV['TEST_STAGE'] = '1'
     vendorize_testfile('gem_require.rb') { |output|
       ENV['keep_folder'] = '__sav'
       vendored_files = Dir["#{Vendorize.root_folder}/**/*"].select {|f| File.file?(f)}
-      assert_equal(36, vendored_files.length, "require rubygems should give 36 files (on my machine...)")
+      assert_equal(rubygems_expected, vendored_files.length, "require rubygems should give #{rubygems_expected} files (on my machine...)")
 
       ENV['TEST_STAGE'] = '2'
       vendorize_file('./gem_require.rb') { |output|
         vendored_files = Dir["#{Vendorize.root_folder}/**/*"].select {|f| File.file?(f)}
-        assert_equal(54, vendored_files.length, "adding test unit gives 54 files (on my machine...)")
+        assert_equal(plus_testunit, vendored_files.length, "adding test unit gives #{plus_testunit} files (on my machine...)")
 
         ENV['TEST_STAGE'] = '3'
         vendorize_file('./gem_require.rb') { |output|
 #puts output
           vendored_files = Dir["#{Vendorize.root_folder}/**/*"].select {|f| File.file?(f)}
-          assert_equal(127, vendored_files.length, "adding mocha gives 127 files (on my machine...)")
-
-          ENV['TEST_STAGE'] = '4'
-          vendorize_file('./gem_require.rb') { |output|
-#puts output
-            vendored_files = Dir["#{Vendorize.root_folder}/**/*"].select {|f| File.file?(f)}
-            assert_equal(132, vendored_files.length, "adding rake gives 132 files (on my machine...)")
-          }
+          assert_equal(plusrake, vendored_files.length, "adding rake gives #{plusrake} files (on my machine...)")
         }
       }
     }

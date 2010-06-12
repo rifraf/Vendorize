@@ -13,9 +13,9 @@ class Vendorize < File
   end
 
   def self.copyfile(from, to)
-    open(from, 'rb') do |r|
+    File.open(from, 'rb') do |r|  # File. needed for IronRuby..!
       content = r.read
-      open(catname(from, to), "wb") {|w| w.write content }
+      File.open(catname(from, to), "wb") {|w| w.write content }
     end
   end
 
