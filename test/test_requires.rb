@@ -78,6 +78,7 @@ class TestRequires < Test::Unit::TestCase
     when :mingw186 then 35
     when :mingw187 then 35
     when :mingw191 then 35
+    when :linux192 then 35
     when :jruby then 35
     when :ironruby then 35
     else flunk("What version?")
@@ -121,6 +122,7 @@ class TestRequires < Test::Unit::TestCase
     when :mingw186 then [35, 53, 59]
     when :mingw187 then [36, 54, 59]
     when :mingw191 then [34, 40, 47]
+    when :linux192 then [18, 25, 31]
     when :jruby then    [21, 39, 45]
     when :ironruby then [26, 44, 49]
     else flunk("What version?")

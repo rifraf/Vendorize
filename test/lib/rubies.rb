@@ -23,27 +23,36 @@ class RubyVersion
       when /1\.9\.1.*mingw32/ 
         @version = :mingw191
         @exe << ' --disable-gems'
-      when /jruby/
+      when /jruby/  # 1.5.1 goes this route
         @version = :jruby
         @exe = 'jruby.exe'
       end
     rescue
-      puts "not #{@exe}"
-      @exe = 'jruby.exe'
-      @version = :jruby
+      @exe = 'ruby'
       begin
-        ver = `#{@exe} -v`
-        puts ver
+      ver = `#{@exe} -v`
+      puts ver
+      case ver
+        when /1\.9\.2.*linux/
+          @version = :linux192
+          @exe << ' --disable-gems'
+        end
       rescue
-        puts "not #{@exe}"
-        @exe = 'ir.exe'
-        @version = :ironruby
-        begin
-        ver = `#{@exe} -v`
-        puts ver
+        @exe = 'jruby.exe'
+        @version = :jruby
+        begin # 1.4.0 goes this route
+          ver = `#{@exe} -v`
+          puts ver
         rescue
-          puts "** Unknown Ruby version **"
-          exit(1)
+          @exe = 'ir.exe'
+          @version = :ironruby
+          begin
+          ver = `#{@exe} -v`
+          puts ver
+          rescue
+            puts "** Unknown Ruby version **"
+            exit(1)
+          end
         end
       end
     end
