@@ -24,12 +24,12 @@ class Vendorize < File
     end
   end
 
-  def self.vendorize(wanted_file)
+  def self.vendorize(wanted_file, possible_extensions)
     dputs "vendorize #{wanted_file}"
-    vendorize('ubygems') if wanted_file =~ /^rubygems$/i
+    vendorize('ubygems', possible_extensions) if wanted_file =~ /^rubygems$/i
     $LOAD_PATH.each {|location|
       f = join(location, wanted_file)
-      ['', '.rb', '.so', '.o', '.dll'].each {|ext|
+      possible_extensions.each {|ext|
         file = f + ext
         if exist?(file) && !directory?(file)
           if location =~ /^#{root_folder}/
@@ -72,7 +72,7 @@ unless ENV['NO_VENDORIZE']  # Cannot do overrides within the tests...
     def require(path)
       dputs "req #{path}"
       if old_require(path)
-        Vendorize.vendorize(path)
+        Vendorize.vendorize(path, ['', '.rb', '.so', '.o', '.dll'])
         true
       else
         false
@@ -87,11 +87,12 @@ unless ENV['NO_VENDORIZE']  # Cannot do overrides within the tests...
 
     alias old_load load
     def load(filename, wrap = false)
-      puts("======================= load > #{filename}")
+      dputs "load #{filename}"
       old_load(filename, wrap)
-      Vendorize.vendorize(path)
+      Vendorize.vendorize(filename, [''])
+      true
       rescue LoadError => load_error
-        puts "load of #{path} failed (not necessarily a problem...)"
+        puts "load of #{filename} failed (not necessarily a problem...)"
         raise load_error
     end
     private :old_load
