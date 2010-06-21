@@ -27,7 +27,7 @@ class TestRequires < Test::Unit::TestCase
   end
 
   def test_should_create_no_folder_for_a_file_with_no_requires
-    vendorize_testfile('no_loads.rb') {
+    vendorize_testfile('no_loads.rb') { |output|
       assert !File.exists?(Vendorize.root_folder)
     }
   end
@@ -35,6 +35,13 @@ class TestRequires < Test::Unit::TestCase
   def test_should_cache_one_file_for_a_single_require
     vendorize_testfile('simple_require.rb') {
       assert File.exists?(File.join(Vendorize.root_folder, 'no_loads.rb'))
+    }
+  end
+
+  def test_can_specify_different_folder
+    ENV['_Vendor_'] = './_different_'
+    vendorize_testfile('simple_require.rb') {
+      assert File.exists?(File.join('./_different_', 'no_loads.rb'))
     }
   end
 
@@ -82,18 +89,19 @@ class TestRequires < Test::Unit::TestCase
 
   def test_should_cache_gem_files
     expected = case Ruby.version
-    when :mri185   then 52
-    when :mingw186 then 53
-    when :mingw187 then 54
-    when :mingw191 then 40
-    when :linux192 then 25
-    when :jruby then    39
-    when :ironruby then 44
+    when :mri185   then 53
+    when :mingw186 then 54
+    when :mingw187 then 55
+    when :mingw191 then 41
+    when :linux192 then 26
+    when :jruby then    40
+    when :ironruby then 45
     else flunk("What version?")
     end
 
     vendorize_testfile('gem_require.rb') { |output|
-      #ENV['keep_folder'] = '__sav'
+      #puts output
+      #ENV['keep_folder'] = '__test_should_cache_gem_files'
       vendored_files = files_in_cache
       assert_equal(expected, vendored_files.length, "Should give #{expected} files (on my machine...)")
     }
@@ -101,20 +109,20 @@ class TestRequires < Test::Unit::TestCase
 
   def test_should_add_to_cache_incrementally
     rubygems_expected, plus_testunit, plusrake = case Ruby.version
-    when :mri185   then [36, 54, 59]
-    when :mingw186 then [35, 53, 59]
-    when :mingw187 then [36, 54, 59]
-    when :mingw191 then [34, 40, 47]
-    when :linux192 then [18, 25, 31]
-    when :jruby then    [21, 39, 45]
-    when :ironruby then [26, 44, 49]
+    when :mri185   then [37, 55, 60]
+    when :mingw186 then [36, 54, 60]
+    when :mingw187 then [37, 55, 60]
+    when :mingw191 then [35, 41, 48]
+    when :linux192 then [19, 26, 32]
+    when :jruby then    [22, 40, 46]
+    when :ironruby then [27, 45, 50]
     else flunk("What version?")
     end
 
     # First stage just requires rubygems
     ENV['TEST_STAGE'] = '1'
     vendorize_testfile('multi_require.rb') { |output|
-      #ENV['keep_folder'] = '__sav'
+      #ENV['keep_folder'] = '__test_should_add_to_cache_incrementally'
       vendored_files = files_in_cache
       assert_equal(rubygems_expected, vendored_files.length, "require rubygems should give #{rubygems_expected} files (on my machine...)")
 
@@ -134,7 +142,7 @@ class TestRequires < Test::Unit::TestCase
           ENV['TEST_STAGE'] = '4'
           vendorize_file('./multi_require.rb') { |output|
             vendored_files = files_in_cache
-            assert_equal(1 + plusrake, vendored_files.length, "adding rake gives #{1 + plusrake} files (on my machine...)")
+            assert_equal(1 + plusrake, vendored_files.length, "adding multi gives #{1 + plusrake} files (on my machine...)")
           }
         }
       }

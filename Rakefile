@@ -1,7 +1,7 @@
-# 
-# To change this template, choose Tools | Templates
-# and open the template in the editor.
- 
+#
+# Vendorize rakefile
+#
+ENV['rubyopt'] = '' # Needed for JRuby tests !?!
 
 require 'rubygems'
 require 'rake'

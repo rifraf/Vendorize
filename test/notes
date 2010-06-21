@@ -5,26 +5,37 @@ GEMS:
   rspec
   test-unit
 
+Tests
+-----
+Tests are done on various versions of Ruby, mostly on Windows
+but also on Ubuntu. Some tests are 'fragile' in that they have
+hard-coded (version specific) values that contain the expected
+number of files cached. Obviously this depends on the exact
+versions of the gems that are loaded. It's the only way I get
+to spot off-by-one errors if things change...
+
+Issues
+------
+Won't work as expected if unusual mangling of $LOAD_PATH is
+done at run time.
+
+Kernel.autoload is not tracked at the moment though Module.autoload is.
+This is because the Kernel version seems not to like getting aliased.
+The Module.autoload caches files at the time of the call, rather than
+when the autoload occurs. This is because Ruby uses an internal version
+of require within the autoload that cannot be patched. However if
+$LOAD_PATH changes between these two points then we might cache the
+wrong file.
+
+Relative files (../lib/file) or absolute files (c:\x\y\z) won't be
+cached.
+
 TODO
 ----
-Test putting files somewhere else
-Test loads
+# TODO: copy folders? Optionally?
+# TODO: skip certain files?
+
 Put in the drb example app
 Sinatra??
 
-relative files? ../lib/file (-> __/lib/file?)
-absolute files? c:\x\y\z (-> c_/x/y/z)
-Mixed \ and / separators
-
-
-  #$LOAD_PATH.unshift Vendorize.root_folder
-
-# TODO: copy folders? Optionally?
-# TODO: skip certain files?
-Test on Ubuntu
-- 1.85 Y
-- 1.86 Y
-- 1.87 Y
-- 1.91 Y
-- JRuby N (partial gems)
-- IronRuby Y
+Kernel require doesn't like being vendorized in Sinatra... Doesn't start up
