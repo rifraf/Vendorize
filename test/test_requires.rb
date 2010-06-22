@@ -91,7 +91,7 @@ class TestRequires < Test::Unit::TestCase
     expected = case Ruby.version
     when :mri185   then 53
     when :mingw186 then 54
-    when :mingw187 then 55
+    when :mingw187 then 54
     when :mingw191 then 41
     when :linux192 then 26
     when :jruby then    40
@@ -100,8 +100,6 @@ class TestRequires < Test::Unit::TestCase
     end
 
     vendorize_testfile('gem_require.rb') { |output|
-      #puts output
-      #ENV['keep_folder'] = '__test_should_cache_gem_files'
       vendored_files = files_in_cache
       assert_equal(expected, vendored_files.length, "Should give #{expected} files (on my machine...)")
     }
@@ -109,13 +107,13 @@ class TestRequires < Test::Unit::TestCase
 
   def test_should_add_to_cache_incrementally
     rubygems_expected, plus_testunit, plusrake = case Ruby.version
-    when :mri185   then [37, 55, 60]
-    when :mingw186 then [36, 54, 60]
-    when :mingw187 then [37, 55, 60]
+    when :mri185   then [37, 55, 61]
+    when :mingw186 then [36, 54, 61]
+    when :mingw187 then [36, 54, 61]
     when :mingw191 then [35, 41, 48]
-    when :linux192 then [19, 26, 32]
-    when :jruby then    [22, 40, 46]
-    when :ironruby then [27, 45, 50]
+    when :linux192 then [19, 26, 33]
+    when :jruby then    [22, 40, 47]
+    when :ironruby then [27, 45, 51]
     else flunk("What version?")
     end
 

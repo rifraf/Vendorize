@@ -32,10 +32,13 @@ cached.
 
 TODO
 ----
-# TODO: copy folders? Optionally?
 # TODO: skip certain files?
 
-Put in the drb example app
-Sinatra??
 
-Kernel require doesn't like being vendorized in Sinatra... Doesn't start up
+DONE
+----
+DONE: Copy folders? (Vendorize.add_dir('cgi'))
+DONE: Copy files? (Vendorize.add('test/unit/ui/fox/testrunner.rb') / Vendorize.add_requirable('test/unit/ui/tk/testrunner'))
+DONE: Put in the drb example app
+DONE: Sinatra
+

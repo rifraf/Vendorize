@@ -2,7 +2,7 @@
 # Copies all required/loaded files that are needed to ENV['_Vendor_'] || './_vendor_'
 #
 def dputs(*args)
-  #puts ["??? "] + args
+  # puts ["??? "] + args
 end
 
 class Vendorize < File
@@ -31,6 +31,19 @@ class Vendorize < File
     wanted_file =~ /^[.~]|^\w:/
   end
 
+  def self.cache(dest_name, source_file, hint)
+    dest = ensure_can_create_file("#{root_folder}/#{dest_name}")
+    return nil if directory?(dest)
+    unless exist?(dest)
+      puts "'#{hint}' cached to #{dest} (from '#{source_file})"
+      copyfile(source_file, dest)
+    else
+      dputs "'#{hint}' updated cache #{dest}  (from '#{source_file}))"
+      copyfile(source_file, dest)
+    end
+    dest
+  end
+
   def self.vendorize(wanted_file, possible_extensions)
     dputs "vendorize #{wanted_file}"
     return nil if skip?(wanted_file)
@@ -42,20 +55,10 @@ class Vendorize < File
         if exist?(file) && !directory?(file)
           if location =~ /^#{root_folder}/
             puts "'#{wanted_file}' loaded from cache at #{file}"
+            return file
           else
-            dest = ensure_can_create_file("#{root_folder}/#{wanted_file}#{ext}")
-            unless exist?(dest)
-              puts "'#{wanted_file}' cached to #{dest} (from '#{file})"
-              copyfile(file, dest)
-            else
-              #dputs "'#{wanted_file}' already in cache at #{dest})"
-              unless directory?(dest)
-                dputs "'#{wanted_file}' updated cache #{dest}  (from '#{file}))"
-                copyfile(file, dest)
-              end
-            end
+            return file if cache("#{wanted_file}#{ext}", file, wanted_file)
           end
-          return
         end
       }
     }
@@ -75,6 +78,33 @@ class Vendorize < File
       Dir.mkdir dir
     end
   end
+
+  # Adds the first file in the load path that matches the
+  # exact name
+  def self.add(path)
+    vendorize(path, [''])
+  end
+
+  # Adds the first file in the load path that matches the
+  # exact name OR matches with one of the 'require' extensions
+  def self.add_requirable(path)
+    vendorize(path, ['', '.rb', '.so', '.o', '.dll'])
+  end
+
+
+  # Adds all files in the load path at or below the
+  # specified directory
+  def self.add_dir(path)
+    $LOAD_PATH.each {|location|
+      f = join(location, path)
+      Dir[File.join(f, '**/*')].each {|file|
+        unless directory?(file)
+          require_name = file[location.length + 1 .. -1]
+          cache(require_name, file, require_name)
+        end
+      }
+    }
+  end
 end
 
 unless ENV['NO_VENDORIZE']  # Cannot do overrides within the tests...
@@ -89,9 +119,9 @@ unless ENV['NO_VENDORIZE']  # Cannot do overrides within the tests...
 
     alias vendorize_old_require require
     def require(path)
-      dputs "req #{path}"
+      dputs "require #{path}"
       if vendorize_old_require(path)
-        Vendorize.vendorize(path, ['', '.rb', '.so', '.o', '.dll'])
+        Vendorize.add_requirable(path)
         true
       else
         false
@@ -108,7 +138,7 @@ unless ENV['NO_VENDORIZE']  # Cannot do overrides within the tests...
     def load(filename, wrap = false)
       dputs "load #{filename}"
       vendorize_old_load(filename, wrap)
-      Vendorize.vendorize(filename, [''])
+      Vendorize.add(filename)
       true
       rescue LoadError => load_error
         puts "load of #{filename} failed (not necessarily a problem...)"
@@ -124,7 +154,7 @@ unless ENV['NO_VENDORIZE']  # Cannot do overrides within the tests...
       alias vendorize_old_kautoload autoload
       def autoload(sym, filename)
         dputs "autoload #{filename}"
-        Vendorize.vendorize(filename, ['', '.rb', '.so', '.o', '.dll'])
+        Vendorize.add_requirable(filename)
         vendorize_old_kautoload(sym, filename)
       end
       private :vendorize_old_kautoload
@@ -136,7 +166,7 @@ unless ENV['NO_VENDORIZE']  # Cannot do overrides within the tests...
     alias vendorize_old_autoload autoload
     def autoload(sym, filename)
       dputs "autoload #{filename}"
-      Vendorize.vendorize(filename, ['', '.rb', '.so', '.o', '.dll'])
+      Vendorize.add_requirable(filename)
       vendorize_old_autoload(sym, filename)
     end
     private :vendorize_old_autoload
