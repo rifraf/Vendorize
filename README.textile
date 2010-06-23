@@ -76,5 +76,7 @@ Copyright (c) 2010 David Lake (rifraf -> rifraf.net)
 Released under the MIT license. See LICENSE file for details.
 
 ==<hr />==
+
 fn1. As always, phrases that are 'quoted' should be interpreted as having the prefix 'not'[2]. IronRubyAppPackager does not compile Ruby. It just looks like it's compiled, and behaves like it's compiled... Quack!
+
 fn2. Recursively of course
