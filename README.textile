@@ -1,14 +1,80 @@
-h1. Vendorize
+h1. Overview
 
---- placeholder ---
+Vendorize is used to create a local project-based cache of all of the files that your application *requires*, *loads* or *autoloads*.
 
-Quick overview: caches all required/loaded files in _vendor_ subfolder.
-Used by IRPackager
+_This includes the standard Ruby library files, GEMs and your site-specific libraries_
 
-....... detail to follow ......
+Example load mechanisms:
 
-h2. License
+<pre><code>require "rubygems"
+require "nokogiri"
+autoload :Builder, "rack/builder"
+load 'a_file.rb'
+</code></pre>
+
+Once have built the cache, your application can be directed to use the cached files *instead of* the originals.
+
+h1. Why would I want to do this?
+
+# You can put all of your application's code under source control.
+# Your application will become immune to external updates to the library or GEMs.
+# Much easier deployment; just ship the application folder and its cache.
+# You can 'compile'[1] your application and its libraries into a single .exe file using IronRuby and "IronRubyAppPackager":http://github.com/rifraf/IronRubyAppPackager
+
+h1. Why should I not do this?
+
+# It's not the Ruby way
+# Your application won't benefit from external updates to the library or GEMs.
+
+h1. Not what you are looking for?
+
+Try
+
+* "Isolate":http://github.com/jbarnette/isolate
+* "Bundler":http://github.com/carlhuda/bundler
+* "OCRA":http://github.com/larsch/ocra
+
+h1. How do I use it?
+
+Vendorize has to get into the application _early_. Otherwise it won't be able to spot files getting loaded. The most effective way to do this is to use the @-r@ option on the command line before anything else gets a chance to load.
+
+e.g. <pre><code>ruby -I..\..\Vendorize\lib -rvendorize sinatra_app.rb
+</code></pre>
+
+Note that Vendorize does not run as a Gem. It can't, because then it would load *after* rubygems. You either need to place @Vendorize.rb@ in your 'site_ruby', or provide the path to it, something like that shown above.
+
+Other than that, you can then just run your application as normal and Vendorize will cache all the files that it sees getting loaded. You can run your application several times if you load different files depending on the situation - the files will just get added to the cache.
+
+When you want to *use* the cache, the easy way is to switch from @-rvendorize@ above to @-rvendor_only@.
+
+i.e. <pre><code>ruby -I..\..\Vendorize\lib -rvendor_only sinatra_app.rb
+</code></pre>
+
+h1. Issues
+
+Vendorize finds files using the normal @$LOAD_PATH@ mechanisms. If your application does strange and unusual things to this in order to trick the loading process, then there is a chance that you won't cache the files that you are expecting. (You can probably work around this as explained in other pages.)
+
+Requires that specify absolute paths or '.' relative paths won't be cached. This is not the Ruby way. You should probably be using code such as this to do such operations:
+
+<pre><code>$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..')
+require 'myproject/test/test_helper'
+</code></pre>
+
+
+h2. Rubygems
+
+Vendorize works with Rubygems and will add its dependencies to the cache if it is required. However you should find that you don't need to run @require 'rubygems'@ when using @-rvendor_only@ because files will get loaded from the Vendorize cache.
+
+h2. Bundler
+
+Vendorize works happily with "Bundler":http://github.com/carlhuda/bundler. You should probably just stick to using Bundler though unless you are planning to use "IronRubyAppPackager":http://github.com/rifraf/IronRubyAppPackager
+
+h1. License
 
 Copyright (c) 2010 David Lake (rifraf -> rifraf.net)
 
 Released under the MIT license. See LICENSE file for details.
+
+==<hr />==
+fn1. As always, phrases that are 'quoted' should be interpreted as having the prefix 'not'[2]. IronRubyAppPackager does not compile Ruby. It just looks like it's compiled, and behaves like it's compiled... Quack!
+fn2. Recursively of course
