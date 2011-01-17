@@ -24,6 +24,7 @@ class Vendorize < File
       content = r.read
       File.open(catname(from, to), "wb") {|w| w.write content }
     end
+	vendorize_rubygems if to =~ /\/rubygems\.rb/
   end
 
   def self.skip?(wanted_file)
@@ -46,7 +47,7 @@ class Vendorize < File
 
   def self.vendorize(wanted_file, possible_extensions)
     dputs "vendorize #{wanted_file}"
-    return nil if skip?(wanted_file)
+    return nil if skip?(wanted_file)    
     vendorize('ubygems', possible_extensions) if wanted_file =~ /^rubygems$/i
     $LOAD_PATH.each {|location|
       f = join(location, wanted_file)
@@ -64,6 +65,21 @@ class Vendorize < File
     }
     dputs "no #{wanted_file}"
     nil
+  end
+  
+  def self.vendorize_rubygems
+  	File.open("#{root_folder}/rubygems.rb", 'w') do |fh|
+  	  fh << <<EOT
+# Vendorized rubygems. Replaces rubygems and forces all files to load from cache
+module Kernel
+  def gem(gem_name, *version_requirements)
+  end
+  private :gem
+end
+require 'thread'
+require 'etc'
+EOT
+  	end
   end
 
   # Can't require any files => can't use FileUtils.mkdir_p

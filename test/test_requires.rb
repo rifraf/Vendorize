@@ -89,10 +89,10 @@ class TestRequires < Test::Unit::TestCase
 
   def test_should_cache_gem_files
     expected = case Ruby.version
-    when :mri185   then 53
+    when :mri185   then 54
     when :mingw186 then 54
     when :mingw187 then 54
-    when :mingw191 then 41
+    when :mingw191 then 43
     when :linux192 then 26
     when :jruby then    40
     when :ironruby then 45
@@ -107,10 +107,10 @@ class TestRequires < Test::Unit::TestCase
 
   def test_should_add_to_cache_incrementally
     rubygems_expected, plus_testunit, plusrake = case Ruby.version
-    when :mri185   then [37, 55, 61]
+    when :mri185   then [38, 56, 62]
     when :mingw186 then [36, 54, 61]
     when :mingw187 then [36, 54, 61]
-    when :mingw191 then [35, 41, 48]
+    when :mingw191 then [37, 43, 49]
     when :linux192 then [19, 26, 33]
     when :jruby then    [22, 40, 47]
     when :ironruby then [27, 45, 51]
