@@ -71,7 +71,7 @@ Vendorize works happily with "Bundler":http://github.com/carlhuda/bundler. You s
 
 h1. License
 
-Copyright (c) 2010 David Lake (rifraf -> rifraf.net)
+Copyright (c) 2010-2011 David Lake (rifraf at rifraf.net)
 
 Released under the MIT license. See LICENSE file for details.
 
