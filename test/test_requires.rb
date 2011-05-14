@@ -89,13 +89,17 @@ class TestRequires < Test::Unit::TestCase
 
   def test_should_cache_gem_files
     expected = case Ruby.version
-    when :mri185   then 54
-    when :mingw186 then 54
-    when :mingw187 then 54
+    when :mri185   then 53
+    when :mingw186 then 55
+    when :mingw187 then 63
     when :mingw191 then 43
+    when :mingw192p0 then 46
+    when :mingw192p180 then 23
     when :linux192 then 26
     when :jruby then    40
+    when :jruby161 then 50
     when :ironruby then 45
+    when :ironruby113 then 29
     else flunk("What version?")
     end
 
@@ -107,13 +111,17 @@ class TestRequires < Test::Unit::TestCase
 
   def test_should_add_to_cache_incrementally
     rubygems_expected, plus_testunit, plusrake = case Ruby.version
-    when :mri185   then [38, 56, 62]
-    when :mingw186 then [36, 54, 61]
-    when :mingw187 then [36, 54, 61]
+    when :mri185   then [37, 55, 61]
+    when :mingw186 then [37, 55, 62]
+    when :mingw187 then [46, 63, 69]
     when :mingw191 then [37, 43, 49]
+    when :mingw192p0 then [40, 46, 51]
+    when :mingw192p180 then [16, 23, 30]
     when :linux192 then [19, 26, 33]
     when :jruby then    [22, 40, 47]
+    when :jruby161 then [32, 50, 57]
     when :ironruby then [27, 45, 51]
+    when :ironruby113  then [22, 29, 35]
     else flunk("What version?")
     end
 

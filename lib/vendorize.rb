@@ -54,7 +54,7 @@ class Vendorize < File
       possible_extensions.each {|ext|
         file = f + ext
         if exist?(file) && !directory?(file)
-          if location =~ /^#{root_folder}/
+          if location.to_s =~ /^#{root_folder}/
             puts "'#{wanted_file}' loaded from cache at #{file}"
             return file
           else
